@@ -7,8 +7,12 @@ require 'rexml/document'
 #    url: a file or http url that should be polled every five seconds
 #    led number: 0...x where x is the number of LEDs connected to this computer
 #    polling frequency: The number of seconds between checking the URL
+# Exmaple URL:
+# http://localhost:8080/job/TestProjectAutoBuild/api/xml 1 5
 
-$led = VisualIndicator.all[ARGV[1] || 0]
+# Minor correction as Ruby was reporting a conversion issue 
+$led = VisualIndicator.all[ARGV[1].to_i || 0]
+
 status_url = "#{ARGV[0] || 'http://localhost:8080/job/foo'}/api/xml"
 
 END {
@@ -59,7 +63,8 @@ while true
   begin
     open(status_url) do |f|
       doc = REXML::Document.new(f)
-      color = doc.elements["mavenModuleSet/color"].text
+      # Updated to work Jenkins
+      color = doc.elements["freeStyleProject/color"].text
 	  $new_status = Status.new(
 		LED_COLOR[color],
 		color =~ /_anime$/, 		
